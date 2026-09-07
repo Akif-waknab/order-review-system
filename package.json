@@ -1,0 +1,15 @@
+{
+  "name": "order-review-launcher",
+  "version": "2.0.0",
+  "description": "Unlimited Packaging - Order Review System Launcher",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "author": "Unlimited Packaging Plc.",
+  "license": "ISC"
+}

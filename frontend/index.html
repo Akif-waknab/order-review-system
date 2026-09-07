@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlimited Packaging - Order Review System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Advanced Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- LOGIN PAGE -->
+    <!-- ========================================== -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="company-logo">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h1>Unlimited Packaging Plc.</h1>
+                    <p class="subtitle">Customer Order Review System</p>
+                    <p class="doc-info">Document: OF/MSD/024 | Issue: 01</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <div id="loginError" class="login-error"></div>
+                    <p class="login-hint">Username: admin | Password: Admin@123</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN APP -->
+    <!-- ========================================== -->
+    <div id="appPage" style="display:none;">
+
+        <!-- TOP NAVBAR -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <i class="fas fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <div class="brand">
+                    <i class="fas fa-box"></i>
+                    <span>Unlimited Packaging</span>
+                    <small>Order Review System</small>
+                </div>
+            </div>
+            <div class="nav-right">
+                <span class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">Admin</span>
+                    <span class="badge" id="userRole">Administrator</span>
+                </span>
+                <button class="btn btn-danger btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="app-layout">
+
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="active" data-page="dashboard">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                    <a href="#" data-page="orders">
+                        <i class="fas fa-list"></i> Orders
+                    </a>
+                    <a href="#" data-page="new-order">
+                        <i class="fas fa-plus-circle"></i> New Order
+                    </a>
+                    <a href="#" data-page="reviews">
+                        <i class="fas fa-check-double"></i> My Reviews
+                    </a>
+                    <a href="#" data-page="reports">
+                        <i class="fas fa-file-pdf"></i> Reports
+                    </a>
+                    <a href="#" data-page="audit">
+                        <i class="fas fa-history"></i> Audit Trail
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <p>v2.0.0</p>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="main-content" id="mainContent">
+
+                <!-- ========================================== -->
+                <!-- DASHBOARD - ADVANCED VERSION -->
+                <!-- ========================================== -->
+                <div id="page-dashboard">
+                    <div class="page-header">
+                        <h1><i class="fas fa-chart-pie"></i> Dashboard</h1>
+                        <p>Welcome back, <span id="dashboardUserName">Admin</span>!</p>
+                    </div>
+
+                    <!-- KPI Cards - CLICKABLE -->
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card blue" onclick="showFilteredOrders('📦 Total Orders', 'all')">
+                            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Orders</h3>
+                                <p id="totalOrders">0</p>
+                            </div>
+                            <span class="click-hint"><i class="fas fa-mouse-pointer"></i> Click to view</span>
+                        </div>
+                        <div class="stat-card yellow" onclick="showFilteredOrders('⏳ Pending Review', 'in_review')">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div class="stat-info">
+                                <h3>Pending Review</h3>
+                                <p id="pendingOrders">0</p>
+                            </div>
+                            <span class="click-hint"><i class="fas fa-mouse-pointer"></i> Click to view</span>
+                        </div>
+                        <div class="stat-card green" onclick="showFilteredOrders('✅ Approved Orders', 'approved')">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>Approved</h3>
+                                <p id="approvedOrders">0</p>
+                            </div>
+                            <span class="click-hint"><i class="fas fa-mouse-pointer"></i> Click to view</span>
+                        </div>
+                        <div class="stat-card red" onclick="showFilteredOrders('❌ Rejected Orders', 'rejected')">
+                            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>Rejected</h3>
+                                <p id="rejectedOrders">0</p>
+                            </div>
+                            <span class="click-hint"><i class="fas fa-mouse-pointer"></i> Click to view</span>
+                        </div>
+                    </div>
+
+                    <!-- Advanced KPIs -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <i class="fas fa-dollar-sign"></i>
+                            <div>
+                                <p>Total Revenue</p>
+                                <h3 id="totalRevenue">$0</h3>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <p>Avg Processing Time</p>
+                                <h3 id="avgProcessingTime">0 days</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Order Status Distribution</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Monthly Order Volume</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Review Status -->
+                    <div class="table-container" style="margin-top:20px;">
+                        <h3 style="padding:16px 20px; margin:0; border-bottom:1px solid #e2e8f0;">
+                            <i class="fas fa-users"></i> Department Review Status
+                        </h3>
+                        <div id="departmentStats">
+                            <div class="loading">Loading department stats...</div>
+                        </div>
+                    </div>
+
+                    <div class="welcome-card" style="margin-top:20px;">
+                        <h2><i class="fas fa-hand-wave"></i> Welcome to the Order Review System</h2>
+                        <p id="welcomeMessage">You are logged in as <strong>System Administrator</strong> from <strong>Administration</strong></p>
+                        <p id="roleMessage">Role: <span class="role-badge">Administrator</span></p>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- ORDERS -->
+                <!-- ========================================== -->
+                <div id="page-orders" style="display:none;">
+                    <div class="page-header">
+                        <h1><i class="fas fa-list"></i> Orders</h1>
+                        <button class="btn btn-primary" onclick="showPage('new-order')">
+                            <i class="fas fa-plus"></i> New Order
+                        </button>
+                    </div>
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orderSearch" placeholder="Search orders..." oninput="filterOrders()">
+                        </div>
+                        <select id="statusFilter" onchange="filterOrders()">
+                            <option value="all">All Status</option>
+                            <option value="draft">Draft</option>
+                            <option value="in_review">In Review</option>
+                            <option value="pending_final_approval">Pending Final</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="loadOrders()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="ordersList">
+                        <div class="loading">Loading orders...</div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- NEW ORDER - WITH SPECIFICATION, FINANCE, QUALITY & COLOR FIELDS -->
+                <!-- ========================================== -->
+                <div id="page-new-order" style="display:none;">
+                    <div class="page-header">
+                        <h1><i class="fas fa-plus-circle"></i> Create New Order</h1>
+                        <span class="step-indicator">Step 1 of 7</span>
+                    </div>
+
+                    <!-- Step Progress -->
+                    <div class="step-progress">
+                        <div class="step active" data-step="1">1. Order Spec</div>
+                        <div class="step" data-step="2">2. Materials</div>
+                        <div class="step" data-step="3">3. Finance</div>
+                        <div class="step" data-step="4">4. Quality</div>
+                        <div class="step" data-step="5">5. Technical</div>
+                        <div class="step" data-step="6">6. Production</div>
+                        <div class="step" data-step="7">7. Final Review</div>
+                    </div>
+
+                    <form id="newOrderForm">
+
+                        <!-- ========================================== -->
+                        <!-- Step 1: Order Specification -->
+                        <!-- ========================================== -->
+                        <div class="form-step active" data-step="1">
+                            <h2>📋 Order Receipt &amp; Specification</h2>
+                            <p class="info-text">Fill in the order details and department requirements</p>
+                            
+                            <div class="form-grid">
+                                <!-- Basic Order Information -->
+                                <div class="form-group">
+                                    <label>Order Number *</label>
+                                    <input type="text" id="orderNumber" required>
+                                    <div id="orderNumberWarning" class="order-number-warning" style="display:none;"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer Name *</label>
+                                    <input type="text" id="customerName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer Contact</label>
+                                    <input type="text" id="customerContact">
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer Phone</label>
+                                    <input type="tel" id="customerPhone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer Email</label>
+                                    <input type="email" id="customerEmail">
+                                </div>
+                                <div class="form-group">
+                                    <label>Salesperson</label>
+                                    <input type="text" id="salesperson">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity *</label>
+                                    <input type="number" id="quantity" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Board / Box Size</label>
+                                    <input type="text" id="boardSize" placeholder="400 × 300 × 250 mm">
+                                </div>
+                                <div class="form-group">
+                                    <label>Material Combination</label>
+                                    <input type="text" id="materialCombination" placeholder="5-Ply Corrugated Board">
+                                </div>
+                                <div class="form-group">
+                                    <label>Expected Delivery Date *</label>
+                                    <input type="date" id="expectedDeliveryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Previous Order Number</label>
+                                    <input type="text" id="previousOrderNumber">
+                                </div>
+                                <div class="form-group">
+                                    <label>KG / Reel Size</label>
+                                    <input type="text" id="reelSize">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea id="remarks" rows="3"></textarea>
+                            </div>
+
+                            <!-- ========================================== -->
+                            <!-- ⭐ ORDER REQUIREMENTS & SPECIFICATIONS -->
+                            <!-- ========================================== -->
+                            <div class="specification-section" style="margin-top: 24px; padding: 20px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h3 style="color: #1a365d; margin-top: 0;">
+                                    <i class="fas fa-clipboard-list"></i> Order Requirements & Specifications
+                                </h3>
+                                <p style="color: #4a5568; font-size: 14px; margin-bottom: 16px;">
+                                    ⚠️ Please provide details so departments can review what's needed to process this order
+                                </p>
+                                
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Required Machines/Equipment *</label>
+                                        <textarea id="requiredMachines" rows="2" placeholder="List all machines required for this order (e.g., Corrugator, Printer, Die-cutter, etc.)"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Required Materials *</label>
+                                        <textarea id="requiredMaterials" rows="2" placeholder="List all materials needed (e.g., Kraft liner 125 GSM, Corrugated board, etc.)"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Required Manpower *</label>
+                                        <textarea id="requiredManpower" rows="2" placeholder="Specify manpower requirements (e.g., 5 operators, 2 supervisors, 1 quality inspector)"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Estimated Processing Days *</label>
+                                        <input type="number" id="estimatedProcessingDays" placeholder="Estimated days to process this order" min="1">
+                                    </div>
+                                    
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>Special Requirements</label>
+                                        <textarea id="specialRequirements" rows="2" placeholder="Any special requirements or instructions for the order"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>Quality Standards *</label>
+                                        <textarea id="qualityStandards" rows="2" placeholder="Specify quality standards (e.g., ISO 9001, Customer specific requirements, Printing quality standards)"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>Technical Specifications *</label>
+                                        <textarea id="technicalSpecifications" rows="2" placeholder="Technical specifications (e.g., board thickness, printing details, box dimensions)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========================================== -->
+                            <!-- ⭐ COLOR REQUIREMENTS (NEW) -->
+                            <!-- ========================================== -->
+                            <div class="specification-section" style="margin-top: 16px; padding: 20px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h3 style="color: #1a365d; margin-top: 0;">
+                                    <i class="fas fa-palette"></i> Color Requirements
+                                </h3>
+                                <p style="color: #4a5568; font-size: 14px; margin-bottom: 16px;">
+                                    🎨 Specify the color requirements for this order
+                                </p>
+                                
+                                <div class="form-grid">
+                                    <div class="form-group" style="grid-column: span 1;">
+                                        <label>Number of Colors Required *</label>
+                                        <select id="numberOfColors" class="color-select" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="1">1 Color</option>
+                                            <option value="2">2 Colors</option>
+                                            <option value="3">3 Colors</option>
+                                            <option value="4">4 Colors</option>
+                                            <option value="5">5 Colors</option>
+                                            <option value="6">6 Colors</option>
+                                            <option value="7">7 Colors</option>
+                                            <option value="8">8 Colors</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" style="grid-column: span 1;">
+                                        <label>Color Type</label>
+                                        <select id="colorTypes" class="color-select">
+                                            <option value="">-- Select Color Type --</option>
+                                            <option value="process_colors">Process Colors (CMYK)</option>
+                                            <option value="pantone">Pantone Colors</option>
+                                            <option value="spot_colors">Spot Colors</option>
+                                            <option value="process_and_spot">Process + Spot Colors</option>
+                                            <option value="custom_mixed">Custom Mixed Colors</option>
+                                            <option value="customer_specific">Customer Specific</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>Color Options (Select all that apply) *</label>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Black"> Black
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="White"> White
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Red"> Red
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Blue"> Blue
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Green"> Green
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Yellow"> Yellow
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Orange"> Orange
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Purple"> Purple
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Pink"> Pink
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Brown"> Brown
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Gray"> Gray
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Silver"> Silver
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Gold"> Gold
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Cyan"> Cyan
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Magenta"> Magenta
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                                                <input type="checkbox" class="color-option" value="Custom"> Custom
+                                            </label>
+                                        </div>
+                                        <div style="margin-top: 4px; font-size: 12px; color: #718096;">
+                                            Select all colors that apply to this order
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="grid-column: span 2;">
+                                        <label>Color Specifications / Details</label>
+                                        <textarea id="colorSpecifications" rows="2" placeholder="Specify color details, pantone numbers, color codes, or special requirements..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- Step 2: Materials -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="2" style="display:none;">
+                            <h2>🧱 Material Management</h2>
+                            <p>Add materials required for this order:</p>
+                            <div id="materialList">
+                                <div class="material-row">
+                                    <select class="material-type">
+                                        <option value="KRAFT LINER">KRAFT LINER</option>
+                                        <option value="TEST LINER">TEST LINER</option>
+                                        <option value="FLUTE LINER">FLUTE LINER</option>
+                                        <option value="WHITE KRAFT">WHITE KRAFT</option>
+                                    </select>
+                                    <select class="material-gsm">
+                                        <option value="125">125 GSM</option>
+                                        <option value="130">130 GSM</option>
+                                        <option value="135">135 GSM</option>
+                                        <option value="140">140 GSM</option>
+                                        <option value="150">150 GSM</option>
+                                    </select>
+                                    <input type="number" class="material-qty" placeholder="Qty (kg)">
+                                    <input type="text" class="material-remarks" placeholder="Remarks">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeMaterial(this)"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="addMaterial()"><i class="fas fa-plus"></i> Add Material</button>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- ⭐ Step 3: Finance Review -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="3" style="display:none;">
+                            <h2>💰 Finance Review</h2>
+                            <p class="info-text">Complete the financial assessment for this order</p>
+                            
+                            <div class="form-grid">
+                                <!-- Payment Terms -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Payment Terms</label>
+                                    <select id="financePaymentTerms" class="finance-select">
+                                        <option value="">-- Select Payment Terms --</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="credit_30">30 Days Credit</option>
+                                        <option value="credit_45">45 Days Credit</option>
+                                        <option value="credit_60">60 Days Credit</option>
+                                        <option value="letter_of_credit">Letter of Credit</option>
+                                        <option value="advance_payment">Advance Payment</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Customer Credit -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Customer Credit Status</label>
+                                    <select id="financeCustomerCredit" class="finance-select">
+                                        <option value="">-- Select Credit Status --</option>
+                                        <option value="cleared">Cleared</option>
+                                        <option value="pending">Pending Review</option>
+                                        <option value="overdue">Overdue</option>
+                                        <option value="limited">Limited</option>
+                                        <option value="blocked">Blocked</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Budget Allocation -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Budget Allocation</label>
+                                    <select id="financeBudgetAllocation" class="finance-select">
+                                        <option value="">-- Select Budget Status --</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="limited">Limited</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Financial Risk Level -->
+                                <div class="form-group">
+                                    <label>Financial Risk Level</label>
+                                    <select id="financeRiskLevel" class="finance-select">
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Profitability -->
+                                <div class="form-group">
+                                    <label>Profitability</label>
+                                    <select id="financeProfitability" class="finance-select">
+                                        <option value="profitable">Profitable</option>
+                                        <option value="marginal">Marginal</option>
+                                        <option value="breakeven">Breakeven</option>
+                                        <option value="loss">Loss</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Financial Clearance Status -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Financial Clearance Status</label>
+                                    <select id="financeClearanceStatus" class="finance-select">
+                                        <option value="cleared">Cleared</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="not_cleared">Not Cleared</option>
+                                        <option value="conditional">Conditional</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Review Comments -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Finance Review Comments</label>
+                                    <textarea id="financeReviewComments" rows="3" placeholder="Enter any comments or notes about the financial review..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- ⭐ Step 4: Quality Review -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="4" style="display:none;">
+                            <h2>✅ PDQM / Quality Review</h2>
+                            <p class="info-text">Complete the quality assessment for this order</p>
+                            
+                            <div class="form-grid">
+                                <!-- Specification Compliance -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Specification Compliance</label>
+                                    <select id="qualitySpecCompliance" class="quality-select">
+                                        <option value="">-- Select Compliance --</option>
+                                        <option value="compliant">Compliant</option>
+                                        <option value="partial">Partial</option>
+                                        <option value="non_compliant">Non-Compliant</option>
+                                        <option value="needs_review">Needs Review</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Quality Requirements -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Quality Requirements</label>
+                                    <select id="qualityRequirements" class="quality-select">
+                                        <option value="">-- Select Quality --</option>
+                                        <option value="met">Met</option>
+                                        <option value="partial">Partial</option>
+                                        <option value="not_met">Not Met</option>
+                                        <option value="needs_improvement">Needs Improvement</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Printing Requirements -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Printing Requirements</label>
+                                    <select id="qualityPrintingRequirements" class="quality-select">
+                                        <option value="">-- Select Printing --</option>
+                                        <option value="acceptable">Acceptable</option>
+                                        <option value="needs_review">Needs Review</option>
+                                        <option value="unacceptable">Unacceptable</option>
+                                        <option value="requires_approval">Requires Approval</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Quality Risk Level -->
+                                <div class="form-group">
+                                    <label>Quality Risk Level</label>
+                                    <select id="qualityRiskLevel" class="quality-select">
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Testing Requirements -->
+                                <div class="form-group">
+                                    <label>Testing Requirements</label>
+                                    <select id="qualityTestingRequirements" class="quality-select">
+                                        <option value="standard">Standard</option>
+                                        <option value="enhanced">Enhanced</option>
+                                        <option value="customer_specific">Customer Specific</option>
+                                        <option value="third_party">Third Party</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Quality Certifications -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Quality Certifications</label>
+                                    <select id="qualityCertifications" class="quality-select">
+                                        <option value="">-- Select Certifications --</option>
+                                        <option value="iso_9001">ISO 9001</option>
+                                        <option value="iso_14001">ISO 14001</option>
+                                        <option value="customer_specific">Customer Specific</option>
+                                        <option value="none">None Required</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Review Comments -->
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>Quality Review Comments</label>
+                                    <textarea id="qualityReviewComments" rows="3" placeholder="Enter any comments or notes about the quality review..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- Step 5: Technical -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="5" style="display:none;">
+                            <h2>🔧 Technical Review</h2>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Machine Availability</label>
+                                    <select id="machineAvailability">
+                                        <option value="available">Available</option>
+                                        <option value="maintenance">Under Maintenance</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Steam Generation</label>
+                                    <select id="steamGeneration">
+                                        <option value="available">Available</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Glue Preparation</label>
+                                    <select id="gluePreparation">
+                                        <option value="available">Available</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Board Production</label>
+                                    <select id="boardProduction">
+                                        <option value="available">Available</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Box Converting</label>
+                                    <select id="boxConverting">
+                                        <option value="available">Available</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Technical Comments</label>
+                                    <input type="text" id="technicalComments" placeholder="Additional technical notes">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- Step 6: Production -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="6" style="display:none;">
+                            <h2>🏭 Production Review</h2>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Corrugator Capacity</label>
+                                    <select id="corrugatorCapacity">
+                                        <option value="available">Available</option>
+                                        <option value="limited">Limited</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Printing Capacity</label>
+                                    <select id="printingCapacity">
+                                        <option value="available">Available</option>
+                                        <option value="limited">Limited</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Manpower Sufficient?</label>
+                                    <select id="manpowerSufficient">
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lead Time Sufficient?</label>
+                                    <select id="leadTimeSufficient">
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- Step 7: Final Review -->
+                        <!-- ========================================== -->
+                        <div class="form-step" data-step="7" style="display:none;">
+                            <h2>📄 Final Review &amp; Submit</h2>
+                            <div class="summary-box">
+                                <h3>Order Summary</h3>
+                                <div id="orderSummary"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> Submit Order
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- REVIEWS -->
+                <!-- ========================================== -->
+                <div id="page-reviews" style="display:none;">
+                    <div class="page-header">
+                        <h1><i class="fas fa-check-double"></i> My Reviews</h1>
+                    </div>
+                    <div id="reviewsList">
+                        <div class="loading">Loading reviews...</div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- REPORTS -->
+                <!-- ========================================== -->
+                <div id="page-reports" style="display:none;">
+                    <div class="page-header">
+                        <h1><i class="fas fa-file-pdf"></i> Reports</h1>
+                    </div>
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <i class="fas fa-file-pdf" style="font-size:48px; color:#e53e3e;"></i>
+                            <h3>Order Report</h3>
+                            <p>Enter Order Number to generate PDF</p>
+                            <button class="btn btn-primary" onclick="generateReport()">Generate PDF</button>
+                        </div>
+                        <div class="report-card">
+                            <i class="fas fa-file-excel" style="font-size:48px; color:#38a169;"></i>
+                            <h3>Excel Export</h3>
+                            <p>Export all orders to Excel</p>
+                            <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- AUDIT -->
+                <!-- ========================================== -->
+                <div id="page-audit" style="display:none;">
+                    <div class="page-header">
+                        <h1><i class="fas fa-history"></i> Audit Trail</h1>
+                    </div>
+                    <div id="auditList">
+                        <div class="loading">Loading audit trail...</div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SIGNATURE MODAL -->
+    <!-- ========================================== -->
+    <div id="signatureModal" class="signature-modal">
+        <div class="signature-modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+                <h2 style="margin: 0; color: #1a365d;">
+                    <i class="fas fa-file-signature"></i> Signature History
+                </h2>
+                <button onclick="closeSignatureModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #a0aec0;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="signatureModalContent">
+                <div class="loading">Loading signatures...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ⭐ FILTERED ORDERS MODAL -->
+    <!-- ========================================== -->
+    <div id="filteredOrdersModal" class="filtered-orders-modal">
+        <div class="filtered-orders-content">
+            <div class="filtered-orders-header">
+                <h2 id="filteredModalTitle">📋 Orders</h2>
+                <button class="close-btn" onclick="closeFilteredModal()">&times;</button>
+            </div>
+            <div id="filteredOrdersBody" class="filtered-orders-body">
+                <div style="text-align:center;padding:40px;color:#a0aec0;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+
+</body>
+</html>
